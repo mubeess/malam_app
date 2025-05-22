@@ -1,0 +1,10 @@
+export const LogoImage = require('./logo.png');
+export const LogoBlue = require('./logo_blue.png');
+export const AvatarImage = require('./avatar.png');
+export const BoxImage = require('./box.png');
+export const IconImage = require('./icon.png');
+export const TawheedImage = require('./tawheed.jpg');
+export const MalamImage = require('./malam.png');
+export const MisbahuImage = require('./mis.jpg');
+export const RiyadImage = require('./riyad.jpg');
+export const HisnulImage = require('./hisnul_muslim.jpg');
