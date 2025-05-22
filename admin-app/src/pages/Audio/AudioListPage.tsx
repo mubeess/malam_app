@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'; // Added useCallback
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchAudioReferences, deleteAudioReference } from '../../api/audioApi'; // Imported deleteAudioReference
-import { AudioReference } from '../../api/types';
+import type { AudioReference } from '../../api/types';
 
 const AudioListPage: React.FC = () => {
   const [audioReferences, setAudioReferences] = useState<AudioReference[]>([]);
@@ -14,6 +14,7 @@ const AudioListPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await fetchAudioReferences();
+      console.log(response, 'auido');
       setAudioReferences(response.data || []);
       setError(null); // Clear previous errors
     } catch (err) {
@@ -69,16 +70,33 @@ const AudioListPage: React.FC = () => {
       </div>
 
       {/* Display messages: loading, deleting, error */}
-      {loading && !isDeleting && <p className="text-center text-gray-600 text-lg">Loading audio references...</p>}
-      {isDeleting && <p className="text-center text-gray-600 text-lg">Deleting audio reference...</p>}
+      {loading && !isDeleting && (
+        <p className="text-center text-gray-600 text-lg">Loading audio references...</p>
+      )}
+      {isDeleting && (
+        <p className="text-center text-gray-600 text-lg">Deleting audio reference...</p>
+      )}
       {error && (
-        <p className={`text-center p-3 rounded-lg text-lg ${error.startsWith('Failed to delete') ? 'text-red-600 bg-red-100' : (error.includes('successfully') ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100')}`}>
+        <p
+          className={`text-center p-3 rounded-lg text-lg ${
+            error.startsWith('Failed to delete')
+              ? 'text-red-600 bg-red-100'
+              : error.includes('successfully')
+              ? 'text-green-600 bg-green-100'
+              : 'text-red-600 bg-red-100'
+          }`}
+        >
           {error}
         </p>
       )}
-      
+
       {!loading && !error && audioReferences.length === 0 && (
-        <p className="text-center text-gray-600 text-lg">No audio references found. <Link to="/audio/new" className="text-green-600 hover:underline">Add one now!</Link></p>
+        <p className="text-center text-gray-600 text-lg">
+          No audio references found.{' '}
+          <Link to="/audio/new" className="text-green-600 hover:underline">
+            Add one now!
+          </Link>
+        </p>
       )}
 
       {!loading && audioReferences.length > 0 && (

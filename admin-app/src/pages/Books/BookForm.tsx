@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Book } from '../../api/types';
+import type { Book } from '../../api/types';
 
 type BookFormData = Omit<Book, 'id' | 'createdAt' | 'updatedAt'>;
 
@@ -25,8 +25,8 @@ const BookForm: React.FC<BookFormProps> = ({
     language: 'English', // Default language
     publishYear: undefined, // Or new Date().getFullYear()
     // Ensure all fields in BookFormData are initialized
-    isbn: '', 
-    publisher: '', 
+    isbn: '',
+    publisher: '',
     pageCount: 0,
     // Add any other fields that might be part of BookFormData but not in initialData typically
   });
@@ -51,13 +51,16 @@ const BookForm: React.FC<BookFormProps> = ({
     }
   }, [initialData]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'publishYear' || name === 'pageCount' ? (value === '' ? undefined : Number(value)) : value,
+      [name]:
+        name === 'publishYear' || name === 'pageCount'
+          ? value === ''
+            ? undefined
+            : Number(value)
+          : value,
     }));
   };
 
@@ -167,7 +170,7 @@ const BookForm: React.FC<BookFormProps> = ({
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
       </div>
-      
+
       {/* Example of other fields if they were part of Book type */}
       {/*
       <div>

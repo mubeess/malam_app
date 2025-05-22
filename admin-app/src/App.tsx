@@ -6,11 +6,12 @@ import AudioListPage from './pages/Audio/AudioListPage';
 import CreateAudioPage from './pages/Audio/CreateAudioPage';
 import EditAudioPage from './pages/Audio/EditAudioPage';
 import VideoListPage from './pages/Videos/VideoListPage'; // Import VideoListPage
+import BookMediaPage from './pages/Books/BookMediaPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <nav className="bg-gray-800 text-white p-4 shadow-md">
+      {/* <nav className="bg-gray-800 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-start space-x-6">
           <Link to="/books" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
             Books
@@ -21,18 +22,21 @@ function App() {
           <Link to="/videos" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
             Videos
           </Link>
-          {/* Add more navigation links here as needed */}
+       
         </div>
-      </nav>
-      
-      <div className="app-container p-4"> {/* Basic container for padding */}
+      </nav> */}
+
+      <div className="app-container p-4">
+        {' '}
+        {/* Basic container for padding */}
         <Routes>
           {/* Book Routes */}
           <Route path="/" element={<BookListPage />} />
           <Route path="/books" element={<BookListPage />} />
           <Route path="/books/new" element={<CreateBookPage />} />
           <Route path="/books/edit/:id" element={<EditBookPage />} />
-          
+          <Route path="/books/:id" element={<BookMediaPage />} />
+
           {/* Audio Routes */}
           <Route path="/audio" element={<AudioListPage />} />
           <Route path="/audio/new" element={<CreateAudioPage />} />

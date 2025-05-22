@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AudioForm from './AudioForm';
 import { createAudioReference } from '../../api/audioApi';
-import { AudioReference } from '../../api/types';
+import type { AudioReference } from '../../api/types';
 
 // Define the type for the data expected by createAudioReference
 type AudioCreationData = Omit<AudioReference, 'id' | 'createdAt' | 'updatedAt'>;
@@ -41,7 +41,10 @@ const CreateAudioPage: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+          role="alert"
+        >
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
         </div>

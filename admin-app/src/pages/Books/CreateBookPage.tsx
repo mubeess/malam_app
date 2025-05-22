@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import BookForm from './BookForm';
 import { createBook } from '../../api/booksApi';
-import { Book } from '../../api/types';
+import type { Book } from '../../api/types';
 
 // Define the type for the data expected by createBook, excluding id, createdAt, updatedAt
 type BookCreationData = Omit<Book, 'id' | 'createdAt' | 'updatedAt'>;
@@ -42,17 +42,16 @@ const CreateBookPage: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+          role="alert"
+        >
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
         </div>
       )}
 
-      <BookForm
-        onSubmit={handleSubmit}
-        isSaving={isSaving}
-        submitButtonText="Create Book"
-      />
+      <BookForm onSubmit={handleSubmit} isSaving={isSaving} submitButtonText="Create Book" />
     </div>
   );
 };

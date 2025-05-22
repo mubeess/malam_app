@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchAllVideoReferences, searchVideoReferences } from '../../api/videoApi';
-import { VideoReference } from '../../api/types';
+import type { VideoReference } from '../../api/types';
 
 const VideoListPage: React.FC = () => {
   const [videoReferences, setVideoReferences] = useState<VideoReference[]>([]);
@@ -46,7 +46,7 @@ const VideoListPage: React.FC = () => {
     e.preventDefault();
     loadVideos(searchQuery);
   };
-  
+
   const handleEditVideo = (id: string | number) => {
     navigate(`/videos/edit/${id}`); // Navigate to edit page (to be created)
   };
@@ -93,13 +93,17 @@ const VideoListPage: React.FC = () => {
       </form>
 
       {loading && <p className="text-center text-gray-600 text-lg">Loading video references...</p>}
-      {error && <p className="text-center text-red-600 bg-red-100 p-3 rounded-lg text-lg">Error: {error}</p>}
-      
+      {error && (
+        <p className="text-center text-red-600 bg-red-100 p-3 rounded-lg text-lg">Error: {error}</p>
+      )}
+
       {!loading && !error && videoReferences.length === 0 && (
         <p className="text-center text-gray-600 text-lg">
-          No video references found. 
+          No video references found.
           {searchQuery && ` For query: "${searchQuery}".`}
-          <Link to="/videos/new" className="text-purple-600 hover:underline ml-1">Add one now!</Link>
+          <Link to="/videos/new" className="text-purple-600 hover:underline ml-1">
+            Add one now!
+          </Link>
         </p>
       )}
 
@@ -127,7 +131,7 @@ const VideoListPage: React.FC = () => {
                   <td className="py-3 px-4">{video.language || 'N/A'}</td>
                   <td className="py-3 px-4">{video.duration || 'N/A'}</td>
                   <td className="py-3 px-4 text-center">
-                    <button 
+                    <button
                       onClick={() => handleEditVideo(video.id)}
                       className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded-md mr-2 text-sm transition duration-150 ease-in-out"
                     >

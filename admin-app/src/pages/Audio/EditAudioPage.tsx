@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import AudioForm from './AudioForm';
 import { fetchAudioReferenceById, updateAudioReference } from '../../api/audioApi';
-import { AudioReference } from '../../api/types';
+import type { AudioReference } from '../../api/types';
 
 // Type for form data, matching what AudioForm provides.
 type AudioUpdateData = Omit<AudioReference, 'id' | 'createdAt' | 'updatedAt'>;
@@ -50,7 +50,7 @@ const EditAudioPage: React.FC = () => {
     setIsSaving(true);
     setError(null);
     try {
-      await updateAudioReference(Number(id), formData); 
+      await updateAudioReference(Number(id), formData);
       navigate('/audio');
     } catch (err) {
       if (err instanceof Error) {
@@ -63,23 +63,30 @@ const EditAudioPage: React.FC = () => {
   };
 
   if (loading) {
-    return <p className="text-center text-gray-600 text-lg p-10">Loading audio reference details...</p>;
+    return (
+      <p className="text-center text-gray-600 text-lg p-10">Loading audio reference details...</p>
+    );
   }
 
   if (error && !audioReference) {
     return (
       <div className="container mx-auto p-4">
         <div className="flex justify-end mb-6">
-           <Link to="/audio" className="text-blue-600 hover:text-blue-800">&larr; Back to Audio List</Link>
+          <Link to="/audio" className="text-blue-600 hover:text-blue-800">
+            &larr; Back to Audio List
+          </Link>
         </div>
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
         </div>
       </div>
     );
   }
-  
+
   if (!audioReference) {
     return <p className="text-center text-red-600 text-lg p-10">Audio reference not found.</p>;
   }
@@ -97,12 +104,15 @@ const EditAudioPage: React.FC = () => {
       </div>
 
       {error && ( // Display error related to submission, if any
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+          role="alert"
+        >
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-      
+
       <AudioForm
         initialData={audioReference}
         onSubmit={handleSubmit}
