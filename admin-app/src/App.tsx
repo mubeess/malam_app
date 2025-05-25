@@ -7,6 +7,7 @@ import CreateAudioPage from './pages/Audio/CreateAudioPage';
 import EditAudioPage from './pages/Audio/EditAudioPage';
 import VideoListPage from './pages/Videos/VideoListPage'; // Import VideoListPage
 import BookMediaPage from './pages/Books/BookMediaPage';
+import Login from './pages/Auth/Login';
 
 function App() {
   return (
@@ -31,7 +32,8 @@ function App() {
         {/* Basic container for padding */}
         <Routes>
           {/* Book Routes */}
-          <Route path="/" element={<BookListPage />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/booklist" element={<BookListPage />} />
           <Route path="/books" element={<BookListPage />} />
           <Route path="/books/new" element={<CreateBookPage />} />
           <Route path="/books/edit/:id" element={<EditBookPage />} />
