@@ -76,11 +76,6 @@ const VideoPlayer = ({
     setIsPlaying(!isPlaying);
   };
 
-  useEffect(() => {
-    return () => {
-      togglePlayPause();
-    };
-  }, []);
 
   const downloadVideo = async () => {
     // Check permissions for Android

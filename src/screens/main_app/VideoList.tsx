@@ -80,7 +80,7 @@ export default function VideoList({ route }) {
     );
   }
   return (
-    <View className="flex-1 bg-gray-500">
+    <View className="flex-1 bg-gray-500 pb-[60px]">
       <VideoPlayer
         url={url}
         poster={MalamImage}
@@ -92,6 +92,7 @@ export default function VideoList({ route }) {
         {allVideoReferences?.map((video) => (
           <VideoListItem
             key={video.id}
+            thumbnail={video.thumnail}
             {...video}
             onPress={() => {
               setUrl(video.url);

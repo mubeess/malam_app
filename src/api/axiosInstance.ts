@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_URL = 'https://3032-102-91-92-12.ngrok-free.app';
+export const API_URL = 'https://malam-backend.onrender.com';
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

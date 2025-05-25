@@ -3,7 +3,7 @@ import { ChevronRight } from '@assets/svg';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 const VideoListItem = ({
-  thumbnail = '/api/placeholder/400/220',
+  thumbnail = '',
   title = 'Nasheed covers | slowed+reverb | Lofi Covers | Jahan Mubarak',
   channelName = 'Jahan Mubarak',
   views = '274K',
@@ -16,7 +16,11 @@ const VideoListItem = ({
     <TouchableOpacity className="w-full mb-4" activeOpacity={0.9} onPress={onPress}>
       {/* Thumbnail with duration */}
       <View className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-200">
-        <Image source={MalamImage} className="w-full h-full" resizeMode="cover" />
+        <Image
+          source={thumbnail ? { uri: thumbnail } : MalamImage}
+          className="w-full h-full"
+          resizeMode="cover"
+        />
         <View className="absolute bottom-2 right-2 bg-black bg-opacity-80 px-1 py-0.5 rounded">
           <Text className="text-white text-xs font-medium">{duration}</Text>
         </View>

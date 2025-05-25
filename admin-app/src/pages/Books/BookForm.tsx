@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Book } from '../../api/types';
+import FileUpload from '../../components/FileUpload';
 
 type BookFormData = Omit<Book, 'id' | 'createdAt' | 'updatedAt'>;
 
@@ -22,7 +23,7 @@ const BookForm: React.FC<BookFormProps> = ({
     description: '',
     coverImage: '',
     category: '',
-    language: 'English', // Default language
+    language: 'Hausa', // Default language
     publishYear: undefined, // Or new Date().getFullYear()
     // Ensure all fields in BookFormData are initialized
     isbn: '',
@@ -30,6 +31,7 @@ const BookForm: React.FC<BookFormProps> = ({
     pageCount: 0,
     // Add any other fields that might be part of BookFormData but not in initialData typically
   });
+  const [uploadStatus, setUploadStatus] = useState<string>('');
 
   useEffect(() => {
     if (initialData) {
@@ -37,7 +39,7 @@ const BookForm: React.FC<BookFormProps> = ({
       // And provide defaults for fields that might be missing in Partial<Book> but required in BookFormData
       setFormData({
         title: initialData.title || '',
-        author: initialData.author || '',
+        author: 'Sheikh Abubakar Mukhtar',
         description: initialData.description || '',
         coverImage: initialData.coverImage || '',
         category: initialData.category || '',
@@ -87,20 +89,6 @@ const BookForm: React.FC<BookFormProps> = ({
       </div>
 
       <div>
-        <label htmlFor="author" className="block text-sm font-medium text-gray-700">
-          Author
-        </label>
-        <input
-          type="text"
-          name="author"
-          id="author"
-          value={formData.author}
-          onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
-
-      <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700">
           Description
         </label>
@@ -114,17 +102,23 @@ const BookForm: React.FC<BookFormProps> = ({
         />
       </div>
 
-      <div>
-        <label htmlFor="coverImage" className="block text-sm font-medium text-gray-700">
-          Cover Image URL
-        </label>
-        <input
-          type="url"
-          name="coverImage"
-          id="coverImage"
-          value={formData.coverImage}
-          onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      <div className="max-w-md mx-auto p-4 space-y-4">
+        <h2 className="text-xl font-semibold">Upload Cover Page</h2>
+
+        <FileUpload
+          onUploadComplete={(url) => {
+            setFormData({ ...formData, coverImage: url });
+            setUploadStatus('Upload successful!');
+          }}
+          onUploadStart={() => {
+            setUploadStatus('Starting upload...');
+          }}
+          onUploadError={(error) => {
+            setUploadStatus(`Error: ${error}`);
+          }}
+          accept=".png,.jpg,.jpeg"
+          maxSizeMB={5}
+          placeholder="Upload Video/Audio"
         />
       </div>
 
@@ -142,7 +136,7 @@ const BookForm: React.FC<BookFormProps> = ({
         />
       </div>
 
-      <div>
+      {/* <div>
         <label htmlFor="language" className="block text-sm font-medium text-gray-700">
           Language <span className="text-red-500">*</span>
         </label>
@@ -155,7 +149,7 @@ const BookForm: React.FC<BookFormProps> = ({
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
-      </div>
+      </div> */}
 
       <div>
         <label htmlFor="publishYear" className="block text-sm font-medium text-gray-700">

@@ -30,6 +30,7 @@ import {
   Headphones,
 } from 'lucide-react';
 import type { VideoReference, AudioReference } from '../../api/types';
+import FileUpload from '../../components/FileUpload';
 
 type MediaTab = 'video' | 'audio';
 
@@ -40,11 +41,15 @@ const BookMediaPage: React.FC = () => {
   const [videos, setVideos] = useState<VideoReference[]>([]);
   const [audios, setAudios] = useState<AudioReference[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [submiting, setSubmiting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<{ type: MediaTab; id: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [uploadStatus2, setUploadStatus2] = useState<string>('');
+
   const [formData, setFormData] = useState<
     | Omit<VideoReference, 'id' | 'createdAt' | 'updatedAt'>
     | Omit<AudioReference, 'id' | 'createdAt' | 'updatedAt'>
@@ -54,7 +59,7 @@ const BookMediaPage: React.FC = () => {
     bookId: Number(id),
     description: '',
     duration: 0,
-    ...(activeTab === 'video' ? { thumbnailUrl: '' } : {}),
+    ...(activeTab === 'video' ? { thumbnail: '' } : {}),
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<VideoReference | AudioReference>>({});
@@ -94,6 +99,7 @@ const BookMediaPage: React.FC = () => {
   const handleAddMedia = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setSubmiting(true);
       setError(null);
       if (activeTab === 'video') {
         await createVideoReference(
@@ -104,6 +110,7 @@ const BookMediaPage: React.FC = () => {
           formData as Omit<AudioReference, 'id' | 'createdAt' | 'updatedAt'>
         );
       }
+      setSubmiting(false);
       await loadMedia();
       setShowAddForm(false);
       setFormData({
@@ -112,9 +119,10 @@ const BookMediaPage: React.FC = () => {
         bookId: Number(id),
         description: '',
         duration: 0,
-        ...(activeTab === 'video' ? { thumbnailUrl: '' } : {}),
+        ...(activeTab === 'video' ? { thumbnail: '' } : {}),
       });
     } catch (err) {
+      setSubmiting(false);
       if (err instanceof Error) {
         setError(`Failed to add ${activeTab}: ${err.message}`);
       } else {
@@ -126,7 +134,7 @@ const BookMediaPage: React.FC = () => {
   const handleEditMedia = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingId) return;
-
+    setSubmiting(true);
     try {
       setError(null);
       if (activeTab === 'video') {
@@ -134,9 +142,11 @@ const BookMediaPage: React.FC = () => {
       } else {
         await updateAudioReference(editingId, editFormData as Partial<AudioReference>);
       }
+      setSubmiting(false);
       await loadMedia();
       setEditingId(null);
     } catch (err) {
+      setSubmiting(false);
       if (err instanceof Error) {
         setError(`Failed to update ${activeTab}: ${err.message}`);
       } else {
@@ -176,7 +186,7 @@ const BookMediaPage: React.FC = () => {
 
   const currentMedia = activeTab === 'video' ? filteredVideos : filteredAudios;
   const MediaIcon = activeTab === 'video' ? Video : Headphones;
-  const mediaColor = activeTab === 'video' ? 'purple' : 'blue';
+  const mediaColor = activeTab === 'video' ? 'blue' : 'blue';
 
   if (loading) {
     return (
@@ -202,9 +212,9 @@ const BookMediaPage: React.FC = () => {
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
                 <MediaIcon className={`w-8 h-8 text-${mediaColor}-600`} />
-                {activeTab === 'video' ? 'Video' : 'Audio'} References
+                {activeTab === 'video' ? 'Video' : 'Audio'}
               </h1>
             </div>
             <p className="text-gray-600 ml-9">Manage {activeTab} references for this book</p>
@@ -212,9 +222,9 @@ const BookMediaPage: React.FC = () => {
           <button
             onClick={() => setShowAddForm(true)}
             className={`bg-gradient-to-r from-${mediaColor}-600 to-${
-              mediaColor === 'purple' ? 'pink' : 'cyan'
+              mediaColor === 'blue' ? 'pink' : 'cyan'
             }-600 hover:from-${mediaColor}-700 hover:to-${
-              mediaColor === 'purple' ? 'pink' : 'cyan'
+              mediaColor === 'blue' ? 'pink' : 'cyan'
             }-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 justify-center sm:justify-start`}
           >
             <Plus className="w-5 h-5" />
@@ -228,7 +238,7 @@ const BookMediaPage: React.FC = () => {
             onClick={() => setActiveTab('video')}
             className={`px-4 py-2 font-medium text-sm flex items-center gap-2 border-b-2 ${
               activeTab === 'video'
-                ? 'border-purple-500 text-purple-600'
+                ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -305,7 +315,7 @@ const BookMediaPage: React.FC = () => {
           <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                Add New {activeTab === 'video' ? 'Video' : 'Audio'} Reference
+                Add New {activeTab === 'video' ? 'Video' : 'Audio'}
               </h2>
               <button
                 onClick={() => setShowAddForm(false)}
@@ -329,41 +339,49 @@ const BookMediaPage: React.FC = () => {
                     className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-${mediaColor}-500 focus:border-transparent`}
                   />
                 </div>
-                <div>
-                  <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-                    URL*
-                  </label>
-                  <input
-                    type="url"
-                    id="url"
-                    required
-                    value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-${mediaColor}-500 focus:border-transparent`}
+                <div className="max-w-md mx-auto p-4 space-y-4">
+                  <h2 className="text-xl font-semibold">
+                    Upload {activeTab == 'video' ? 'Video' : 'Audio'}
+                  </h2>
+
+                  <FileUpload
+                    onUploadComplete={(url) => {
+                      setFormData({ ...formData, url });
+                      setUploadStatus('Upload successful!');
+                    }}
+                    onUploadStart={() => {
+                      setUploadStatus('Starting upload...');
+                    }}
+                    onUploadError={(error) => {
+                      setUploadStatus(`Error: ${error}`);
+                    }}
+                    accept=".mp4,.mp3"
+                    maxSizeMB={10 * 1024 * 1024 * 1024}
+                    placeholder="Upload Video/Audio"
                   />
                 </div>
-                {activeTab === 'video' && (
-                  <div>
-                    <label
-                      htmlFor="thumbnailUrl"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Thumbnail URL
-                    </label>
-                    <input
-                      type="url"
-                      id="thumbnailUrl"
-                      value={(formData as VideoReference).thumbnailUrl || ''}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          thumbnailUrl: e.target.value,
-                        })
-                      }
-                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-${mediaColor}-500 focus:border-transparent`}
-                    />
-                  </div>
-                )}
+                {activeTab === 'video' &&
+                  (uploadStatus == '' || uploadStatus == 'Upload successful!') && (
+                    <div className="max-w-md mx-auto p-4 space-y-4">
+                      <h2 className="text-xl font-semibold">Thumbnail</h2>
+
+                      <FileUpload
+                        onUploadComplete={(url) => {
+                          setFormData({ ...formData, thumbnail: url });
+                          setUploadStatus2('Upload successful!');
+                        }}
+                        onUploadStart={() => {
+                          setUploadStatus2('Starting upload...');
+                        }}
+                        onUploadError={(error) => {
+                          setUploadStatus2(`Error: ${error}`);
+                        }}
+                        accept=".jpg,.jpeg,.png"
+                        maxSizeMB={5}
+                        placeholder="Upload image"
+                      />
+                    </div>
+                  )}
                 <div>
                   <label
                     htmlFor="duration"
@@ -404,13 +422,17 @@ const BookMediaPage: React.FC = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className={`px-4 py-2 bg-${mediaColor}-600 hover:bg-${mediaColor}-700 text-white rounded-lg transition-colors flex items-center gap-2`}
-                >
-                  <Check className="w-4 h-4" />
-                  Add {activeTab === 'video' ? 'Video' : 'Audio'}
-                </button>
+                {submiting ? (
+                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+                ) : (
+                  <button
+                    type="submit"
+                    className={`px-4 py-2 bg-${mediaColor}-600 hover:bg-${mediaColor}-700 text-white rounded-lg transition-colors flex items-center gap-2`}
+                  >
+                    <Check className="w-4 h-4" />
+                    Add {activeTab === 'video' ? 'Video' : 'Audio'}
+                  </button>
+                )}
               </div>
             </form>
           </div>
@@ -558,13 +580,17 @@ const BookMediaPage: React.FC = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className={`px-4 py-2 bg-${mediaColor}-600 hover:bg-${mediaColor}-700 text-white rounded-lg transition-colors flex items-center gap-2`}
-                >
-                  <Check className="w-4 h-4" />
-                  Save Changes
-                </button>
+                {submiting ? (
+                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+                ) : (
+                  <button
+                    type="submit"
+                    className={`px-4 py-2 bg-${mediaColor}-600 hover:bg-${mediaColor}-700 text-white rounded-lg transition-colors flex items-center gap-2`}
+                  >
+                    <Check className="w-4 h-4" />
+                    Save Changes
+                  </button>
+                )}
               </div>
             </form>
           </div>
@@ -610,10 +636,10 @@ const BookMediaPage: React.FC = () => {
                     key={media.id}
                     className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden"
                   >
-                    {activeTab === 'video' && (media as VideoReference).thumbnailUrl ? (
+                    {activeTab === 'video' && (media as VideoReference).thumnail ? (
                       <div className="h-40 bg-gray-100 overflow-hidden">
                         <img
-                          src={(media as VideoReference).thumbnailUrl}
+                          src={(media as VideoReference).thumnail}
                           alt={media.title}
                           className="w-full h-full object-cover"
                         />
@@ -621,7 +647,7 @@ const BookMediaPage: React.FC = () => {
                     ) : (
                       <div
                         className={`h-40 bg-gradient-to-br from-${mediaColor}-100 to-${
-                          mediaColor === 'purple' ? 'pink' : 'cyan'
+                          mediaColor === 'blue' ? 'pink' : 'cyan'
                         }-100 flex items-center justify-center`}
                       >
                         <MediaIcon className={`w-12 h-12 text-${mediaColor}-500`} />
@@ -707,7 +733,7 @@ const BookMediaPage: React.FC = () => {
                       ) : (
                         <div
                           className={`w-full sm:w-40 h-24 bg-gradient-to-br from-${mediaColor}-100 to-${
-                            mediaColor === 'purple' ? 'pink' : 'cyan'
+                            mediaColor === 'blue' ? 'pink' : 'cyan'
                           }-100 rounded-lg flex items-center justify-center flex-shrink-0`}
                         >
                           <MediaIcon className={`w-8 h-8 text-${mediaColor}-500`} />
