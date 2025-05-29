@@ -45,3 +45,7 @@ export interface VideoReferencesResponse {
   data: VideoReference[];
   pagination: PaginationData;
 }
+export interface UserSchema {
+  email: string;
+  password: string;
+}

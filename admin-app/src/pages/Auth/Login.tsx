@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../../hooks/useLogin';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-
+  const { loginUser, loading } = useLogin();
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -16,9 +18,15 @@ export default function Login() {
     });
   };
 
-  const handleSubmit = () => {
-    // Handle login logic here
-    console.log('Login attempt:', formData);
+  const handleSubmit = async () => {
+    if (formData.email && formData.password) {
+      const logindata = await loginUser({ ...formData });
+      if (logindata?.token) {
+        navigate('/booklist');
+      } else {
+        alert(logindata.message);
+      }
+    }
   };
 
   return (
@@ -111,15 +119,13 @@ export default function Login() {
             </div>
 
             <div>
-              <Link to="/booklist">
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
-                >
-                  Sign in
-                </button>
-              </Link>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+              >
+                {loading ? 'loading........' : ' Sign in'}
+              </button>
             </div>
           </div>
 
