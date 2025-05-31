@@ -25,7 +25,7 @@ export const fetchAudioReferenceById = async (id: number): Promise<AudioReferenc
 export const createAudioReference = async (
   audioData: CreateAudioReferenceData
 ): Promise<AudioReference> => {
-  const response = await axiosInstance.post<AudioReference>('/audio/add', audioData);
+  const response = await axiosInstance.post<AudioReference>('/audio', audioData);
   return response.data;
 };
 

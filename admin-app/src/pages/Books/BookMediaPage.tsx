@@ -51,19 +51,7 @@ const BookMediaPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
-  const [uploadStatus2, setUploadStatus2] = useState<string>('');
 
-  const [formData, setFormData] = useState<
-    | Omit<VideoReference, 'id' | 'createdAt' | 'updatedAt'>
-    | Omit<AudioReference, 'id' | 'createdAt' | 'updatedAt'>
-  >({
-    title: '',
-    url: '',
-    bookId: Number(id),
-    description: '',
-    duration: 0,
-    ...(activeTab === 'video' ? { thumbnail: '' } : {}),
-  });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<VideoReference | AudioReference>>({});
 
@@ -98,41 +86,6 @@ const BookMediaPage: React.FC = () => {
   const filteredAudios = audios.filter((audio) =>
     audio.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleAddMedia = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setSubmiting(true);
-      setError(null);
-      if (activeTab === 'video') {
-        await createVideoReference(
-          formData as Omit<VideoReference, 'id' | 'createdAt' | 'updatedAt'>
-        );
-      } else {
-        await createAudioReference(
-          formData as Omit<AudioReference, 'id' | 'createdAt' | 'updatedAt'>
-        );
-      }
-      setSubmiting(false);
-      await loadMedia();
-      setShowAddForm(false);
-      setFormData({
-        title: '',
-        url: '',
-        bookId: Number(id),
-        description: '',
-        duration: 0,
-        ...(activeTab === 'video' ? { thumbnail: '' } : {}),
-      });
-    } catch (err) {
-      setSubmiting(false);
-      if (err instanceof Error) {
-        setError(`Failed to add ${activeTab}: ${err.message}`);
-      } else {
-        setError(`An unknown error occurred while adding the ${activeTab}.`);
-      }
-    }
-  };
 
   const handleEditMedia = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -321,123 +274,121 @@ const BookMediaPage: React.FC = () => {
                 Add New {activeTab === 'video' ? 'Video' : 'Audio'}
               </h2>
               <button
-                onClick={() => setShowAddForm(false)}
+                onClick={() => {
+                  setShowAddForm(false);
+                  setUploadStatus('');
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <form onSubmit={handleAddMedia}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                    Title*
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-${mediaColor}-500 focus:border-transparent`}
-                  />
-                </div>
-                <div className="max-w-md mx-auto p-4 space-y-4">
-                  <h2 className="text-xl font-semibold">
-                    Upload {activeTab == 'video' ? 'Video' : 'Audio'}
-                  </h2>
 
-                  <FileUpload
-                    onUploadComplete={(url) => {
-                      setFormData({ ...formData, url });
-                      setUploadStatus('Upload successful!');
-                    }}
-                    onUploadStart={() => {
-                      setUploadStatus('Starting upload...');
-                    }}
-                    onUploadError={(error) => {
-                      setUploadStatus(`Error: ${error}`);
-                    }}
-                    accept=".mp4,.mp3"
-                    maxSizeMB={10 * 1024 * 1024 * 1024}
-                    placeholder="Upload Video/Audio"
-                  />
-                </div>
-                {activeTab === 'video' &&
-                  (uploadStatus == '' || uploadStatus == 'Upload successful!') && (
-                    <div className="max-w-md mx-auto p-4 space-y-4">
-                      <h2 className="text-xl font-semibold">Thumbnail</h2>
+            <div className="space-y-6">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Upload {activeTab === 'video' ? 'Video File' : 'Audio File'}
+                </h3>
 
-                      <FileUpload
-                        onUploadComplete={(url) => {
-                          setFormData({ ...formData, thumbnail: url });
-                          setUploadStatus2('Upload successful!');
-                        }}
-                        onUploadStart={() => {
-                          setUploadStatus2('Starting upload...');
-                        }}
-                        onUploadError={(error) => {
-                          setUploadStatus2(`Error: ${error}`);
-                        }}
-                        accept=".jpg,.jpeg,.png"
-                        maxSizeMB={5}
-                        placeholder="Upload image"
-                      />
-                    </div>
-                  )}
-                <div>
-                  <label
-                    htmlFor="duration"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                <FileUpload
+                  multiple={true}
+                  maxFiles={50}
+                  onUploadComplete={async (myfile) => {
+                    try {
+                      setSubmiting(true);
+                      setError(null);
+
+                      // Check if myfile is an array and has items
+                      if (!Array.isArray(myfile) || myfile.length === 0) {
+                        throw new Error('No files uploaded');
+                      }
+
+                      // Use Promise.all for better error handling and performance
+                      await Promise.all(
+                        myfile.map(async (data) => {
+                          // Validate data structure
+                          if (!data?.file?.name || !data?.url) {
+                            throw new Error('Invalid file data structure');
+                          }
+
+                          const mediaData = {
+                            title: data.file.name,
+                            url: data.url,
+                            duration: 60,
+                            bookId: Number(id), // Make sure 'id' is defined in scope
+                          };
+
+                          if (activeTab === 'video') {
+                            await createVideoReference(mediaData);
+                          } else if (activeTab === 'audio') {
+                            await createAudioReference(mediaData);
+                          } else {
+                            throw new Error(`Invalid active tab: ${activeTab}`);
+                          }
+                        })
+                      );
+
+                      // Success - reset form and reload
+                      setSubmiting(false);
+                      await loadMedia();
+                      setShowAddForm(false);
+                    } catch (err) {
+                      setSubmiting(false);
+                      console.error('Upload error:', err);
+
+                      if (err instanceof Error) {
+                        setError(`Failed to add ${activeTab}: ${err.message}`);
+                      } else {
+                        setError(`An unknown error occurred while adding the ${activeTab}.`);
+                      }
+                    }
+                  }}
+                  onUploadStart={() => {
+                    setUploadStatus('Uploading...');
+                    setError(null);
+                  }}
+                  onUploadError={(error) => {
+                    setUploadStatus(`Error: ${error}`);
+                    setError(error);
+                  }}
+                  accept={activeTab === 'video' ? '.mp4,.mov,.webm' : '.mp3,.wav,.ogg'}
+                  maxSizeMB={1024} // 1GB
+                  placeholder={`Drag & drop your ${activeTab} file here or click to browse`}
+                />
+
+                {uploadStatus && (
+                  <div
+                    className={`mt-4 text-sm ${
+                      uploadStatus.includes('failed') || uploadStatus.includes('Error')
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }`}
                   >
-                    Duration (seconds)
-                  </label>
-                  <input
-                    type="number"
-                    id="duration"
-                    min="0"
-                    value={formData.duration}
-                    onChange={(e) => setFormData({ ...formData, duration: Number(e.target.value) })}
-                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-${mediaColor}-500 focus:border-transparent`}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label
-                    htmlFor="description"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-${mediaColor}-500 focus:border-transparent`}
-                  />
+                    {uploadStatus}
+                  </div>
+                )}
+
+                <div className="mt-4 text-xs text-gray-500">
+                  <p>
+                    Supported formats: {activeTab === 'video' ? 'MP4, MOV, WEBM' : 'MP3, WAV, OGG'}
+                  </p>
+                  <p>Max file size: 1GB</p>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end gap-3">
+
+              <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setUploadStatus('');
+                  }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
-                {submiting ? (
-                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-                ) : (
-                  <button
-                    type="submit"
-                    className={`px-4 py-2 bg-${mediaColor}-600 hover:bg-${mediaColor}-700 text-white rounded-lg transition-colors flex items-center gap-2`}
-                  >
-                    <Check className="w-4 h-4" />
-                    Add {activeTab === 'video' ? 'Video' : 'Audio'}
-                  </button>
-                )}
               </div>
-            </form>
+            </div>
           </div>
         )}
 
