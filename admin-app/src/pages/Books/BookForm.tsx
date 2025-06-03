@@ -42,17 +42,18 @@ const BookForm: React.FC<BookFormProps> = ({
     if (initialData) {
       // Ensure all fields from initialData are correctly mapped
       // And provide defaults for fields that might be missing in Partial<Book> but required in BookFormData
+
       setFormData({
-        title: initialData.title || '',
+        title: initialData.book.title || '',
         author: 'Sheikh Abubakar Mukhtar',
-        description: initialData.description || '',
-        coverImage: initialData.coverImage || '',
-        category: initialData.category || '',
-        language: initialData.language || 'English',
-        publishYear: initialData.publishYear || undefined,
-        isbn: initialData.isbn || '',
-        publisher: initialData.publisher || '',
-        pageCount: initialData.pageCount || 0,
+        description: initialData.book.description || '',
+        coverImage: initialData.book.coverImage || '',
+        category: initialData.book.category || '',
+        language: initialData.book.language || 'English',
+        publishYear: initialData.book.publishYear || undefined,
+        isbn: initialData.book.isbn || '',
+        publisher: initialData.book.publisher || '',
+        pageCount: initialData.book.pageCount || 0,
         // Map other fields as necessary
       });
     }

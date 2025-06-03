@@ -19,6 +19,7 @@ const EditBookPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log(id, 'id');
     if (!id) {
       setError('Book ID is missing.');
       setLoading(false);
