@@ -192,7 +192,6 @@ const PrivacyPolicy: React.FC = () => (
         <p className="text-sm text-gray-500">
           This policy may be updated occasionally. We'll always keep it simple and transparent.
         </p>
-        <p className="text-xs text-gray-400 mt-2">Made with ❤️ for music lovers</p>
       </div>
     </div>
   </div>
