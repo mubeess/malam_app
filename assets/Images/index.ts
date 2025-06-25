@@ -5,6 +5,7 @@ export const BoxImage = require('./box.png');
 export const IconImage = require('./icon.png');
 export const TawheedImage = require('./tawheed.jpg');
 export const MalamImage = require('./malam.png');
+export const MalamImage2 = require('./malam2.png');
 export const MisbahuImage = require('./mis.jpg');
 export const RiyadImage = require('./riyad.jpg');
 export const HisnulImage = require('./hisnul_muslim.jpg');

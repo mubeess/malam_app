@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StatusBar,
   ImageBackground,
+  ScrollView,
 } from 'react-native';
 import React, { useEffect, useState, useDeferredValue, useMemo } from 'react';
 import { usePost } from '@amukhtar/hooks/usePost';
@@ -45,7 +46,7 @@ export default function Home({ navigation }) {
             style={{ height: '100%', width: '100%' }}
           ></ImageBackground>
         </View>
-        <View className="flex-1 bg-white">
+        <ScrollView className="flex-1 bg-white px-[5px]">
           {loading && <SkeletonLoader count={8} />}
           {!loading && (!allBooks || allBooks.length === 0) && (
             <View className="flex-1 justify-center items-center py-10">
@@ -58,18 +59,21 @@ export default function Home({ navigation }) {
               </TouchableOpacity>
             </View>
           )}
-          {allBooks.map((book) => (
-            <BookMenuItem
-              key={book.title}
-              title={book.title}
-              coverImage={book.coverImage}
-              onPress={() => {
-                dispatch(setBookId(book.id));
-                navigation.navigate('BookDetails');
-              }}
-            />
-          ))}
-        </View>
+          {allBooks
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((book) => (
+              <BookMenuItem
+                description={book.description}
+                key={book.title}
+                title={book.title}
+                coverImage={book.coverImage}
+                onPress={() => {
+                  dispatch(setBookId(book.id));
+                  navigation.navigate('BookDetails');
+                }}
+              />
+            ))}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

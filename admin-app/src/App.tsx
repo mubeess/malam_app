@@ -8,6 +8,7 @@ import EditAudioPage from './pages/Audio/EditAudioPage';
 import VideoListPage from './pages/Videos/VideoListPage'; // Import VideoListPage
 import BookMediaPage from './pages/Books/BookMediaPage';
 import Login from './pages/Auth/Login';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function App() {
   return (
@@ -46,6 +47,9 @@ function App() {
 
           {/* Video Routes */}
           <Route path="/videos" element={<VideoListPage />} />
+
+          {/* Public Privacy Policy Route */}
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </div>
     </BrowserRouter>

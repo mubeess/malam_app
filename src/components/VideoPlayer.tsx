@@ -76,30 +76,29 @@ const VideoPlayer = ({
     setIsPlaying(!isPlaying);
   };
 
-
   const downloadVideo = async () => {
     // Check permissions for Android
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission',
-            message: 'App needs access to your storage to download videos',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Storage permission denied');
-          return;
-        }
-      } catch (err) {
-        console.warn(err);
-        return;
-      }
-    }
+    // if (Platform.OS === 'android') {
+    //   try {
+    //     const granted = await PermissionsAndroid.request(
+    //       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    //       {
+    //         title: 'Storage Permission',
+    //         message: 'App needs access to your storage to download videos',
+    //         buttonNeutral: 'Ask Me Later',
+    //         buttonNegative: 'Cancel',
+    //         buttonPositive: 'OK',
+    //       }
+    //     );
+    //     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+    //       console.log('Storage permission denied');
+    //       return;
+    //     }
+    //   } catch (err) {
+    //     console.warn(err);
+    //     return;
+    //   }
+    // }
 
     // Start download
     setIsDownloading(true);

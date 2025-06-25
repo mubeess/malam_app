@@ -32,29 +32,11 @@ const AudioListItem = ({
           {/* Top section with badge */}
           <View className="flex-row justify-between items-start">
             <View className="flex-1 pr-4">
-              <Text className="text-lg font-semibold text-gray-800">{title}</Text>
-
-              {/* Stats row */}
-              <View className="flex-row items-center mt-1">
-                <AudioIcon />
-                <Text className="ml-1 mr-3 text-gray-500">{totalTracks}</Text>
-
-                <DownloadIcon />
-                <Text className="ml-1 mr-3 text-gray-500">{downloads}</Text>
-
-                <ClockIcon />
-                <Text className="ml-1 text-gray-500">{date}</Text>
-              </View>
+              <Text className="text-lg font-semibold text-black">{title}</Text>
             </View>
           </View>
 
           {/* Mosque name with icon */}
-          <View className="flex-row items-center mt-2">
-            <View className="bg-green-700 w-6 h-6 rounded-full justify-center items-center mr-2">
-              <Image source={TawheedImage} className="w-4 h-4" />
-            </View>
-            <Text className="text-green-700 font-medium">{description}</Text>
-          </View>
         </View>
 
         {/* Right chevron */}

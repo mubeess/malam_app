@@ -159,7 +159,7 @@ const AudioPlayerModal = ({
             description: 'Audio download in progress',
             mime: 'audio/mpeg', // Change to correct MIME type for mp3
             mediaScannable: true,
-            saveToDownloads: true, // This ensures the file appears in Downloads
+            path: `${RNFetchBlob.fs.dirs.DownloadDir}/${filename}`,
           },
         })
           .fetch('GET', currentTrack?.url)
@@ -180,17 +180,23 @@ const AudioPlayerModal = ({
       }
     } catch (error) {
       setIsDownloading(false);
-      console.error('General error:', error);
+      console.log('General error:', error);
       setError('Download process failed');
     }
   };
   return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+    <Modal
+      style={{ flex: 1 }}
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View className="flex-1 bg-[rgba(0,0,0,0.5)] justify-end">
         <View className="bg-white h-[70%] rounded-t-xl">
           {/* Header with dropdown icon */}
           <View className="px-4 py-2 flex-row justify-between items-center">
-            <Text className="text-2xl font-bold text-black" numberOfLines={1}>
+            <Text className="text-2xl font-bold text-black max-w-[90%]" numberOfLines={1}>
               {currentTrack?.title || 'Now Playing'}
             </Text>
             <TouchableOpacity onPress={onClose}>
@@ -271,15 +277,6 @@ const AudioPlayerModal = ({
               </View>
             </TouchableOpacity>
           </View>
-
-          {/* Close button at bottom */}
-          <TouchableOpacity
-            onPress={onClose}
-            className="items-center py-4 border-t border-gray-200"
-          >
-            <View className="w-16 h-1 bg-gray-300 rounded-full" />
-            <Text className="mt-2 text-gray-500 font-medium">Close</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>

@@ -29,21 +29,21 @@ export default function BookDetails() {
     skipToNext,
     skipToPrevious,
     addTracks,
+    setCurrentAudioIndex,
+    skipToTrack,
   } = useAudioPlayer();
 
   const id = useSelector((data: RootState) => data.book.id);
   const [activeAudioIndex, setActiveAudioIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const { getAudioReferencesByBookId, loading, allAudioReferences } = useAudio();
- 
 
   useEffect(() => {
     if (id) {
       getAudioReferencesByBookId(id);
+      clearQueue();
     }
   }, [id]);
-
-
 
   useEffect(() => {
     if (allAudioReferences && allAudioReferences.length > 0) {
@@ -82,8 +82,9 @@ export default function BookDetails() {
       // If a different audio is clicked, set to play that index
       else {
         setActiveAudioIndex(index);
+        skipToTrack(index);
         // This will automatically play the track at this index
-        await skipToNext(index);
+        // await skipToNext(index);
       }
     } catch (error) {
       console.error('Error handling audio press:', error);
