@@ -1,6 +1,10 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-plugins { id("com.facebook.react.settings") }
+plugins { 
+id("com.facebook.react.settings") 
+id("com.newrelic.agent.android") version "7.6.6" apply false
+ }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = "Sheikh Abubakar Mukhtar"
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
+
