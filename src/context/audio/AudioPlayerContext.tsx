@@ -44,9 +44,6 @@ export const setupPlayer = async (): Promise<boolean> => {
       ],
       // Android notification settings
       android: {
-        channelId: 'com.abubakar.mukhtar.audio',
-        channelName: 'Audio Playback',
-        channelDescription: 'Audio playback controls',
         foregroundService: {
           notificationCapabilities: [
             Capability.Play,
@@ -196,9 +193,15 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
 
   // Listen for track player events
   useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], async (event) => {
-    if (event.type === Event.PlaybackActiveTrackChanged && event.track !== undefined) {
+    if (
+      event.type === Event.PlaybackActiveTrackChanged &&
+      event.track !== undefined &&
+      event.index !== undefined
+    ) {
       const track = await TrackPlayer.getTrack(event.index);
-      setCurrentTrack(track);
+      if (track) {
+        setCurrentTrack(track);
+      }
     }
   });
 
@@ -220,9 +223,6 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
       } else if (event.permanent) {
         // We've permanently lost audio focus
         await TrackPlayer.stop();
-      } else if (!event.paused && event.ducking) {
-        // Lower volume during temporary interruption
-        await TrackPlayer.setVolume(0.5);
       } else {
         // We've regained focus, resume playback if needed
         if (wasPlayingBeforeInterruption) {
@@ -391,35 +391,87 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
 
   // New methods for handling audio items
   const handleAudioPress = async (item: any, index: number): Promise<void> => {
+    console.log('handleAudioPress called:', {
+      index,
+      currentAudioIndex,
+      isPlaying,
+      item,
+      isPlayerReady,
+    });
+
+    if (!isPlayerReady) {
+      console.log('Player not ready, cannot handle audio press');
+      setError('Audio player is not ready yet. Please try again.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       // If the same audio is clicked and it's playing, pause it
       if (currentAudioIndex === index && isPlaying) {
+        console.log('Pausing current track');
         await pause();
       }
       // If the same audio is clicked but paused, resume playback
       else if (currentAudioIndex === index && !isPlaying) {
+        console.log('Resuming current track');
         await play();
       }
-      // If a different audio is clicked, clear queue and add new track
+      // If a different audio is clicked, ensure it's in the queue and play it
       else {
-        await clearQueue();
+        console.log('Switching to different track');
+        // Check if the queue is empty or if we need to add tracks
+        const currentQueue = await TrackPlayer.getQueue();
+        console.log('Current queue length:', currentQueue.length);
 
-        const track = {
-          id: `track-${index}`,
-          url: item.url,
-          title: item.title,
-          artist: item.mosque || 'Unknown',
-          artwork: item.artwork,
-        };
+        if (currentQueue.length === 0) {
+          // Queue is empty, add the track and play it
+          console.log('Queue is empty, adding track');
+          const track = {
+            id: `track-${index}`,
+            url: item.url,
+            title: item.title,
+            artist: item.mosque || 'Unknown',
+            artwork: item.artwork,
+          };
 
-        const added = await addTrack(track);
-        if (added) {
+          const added = await addTrack(track);
+          if (added) {
+            setCurrentAudioIndex(index);
+            console.log('Track added, starting playback');
+            await play();
+          } else {
+            console.error('Failed to add track');
+          }
+        } else if (index < currentQueue.length) {
+          // Track exists in queue, skip to it
+          console.log('Track exists in queue, skipping to index:', index);
           setCurrentAudioIndex(index);
-          await play();
+          await skipToTrack(index);
+          await play(); // Explicitly call play to ensure it starts
+        } else {
+          // Index is out of bounds, add the track to the end and play it
+          console.log('Index out of bounds, adding track to end');
+          const track = {
+            id: `track-${index}`,
+            url: item.url,
+            title: item.title,
+            artist: item.mosque || 'Unknown',
+            artwork: item.artwork,
+          };
+
+          const added = await addTrack(track);
+          if (added) {
+            setCurrentAudioIndex(index);
+            console.log('Track added to end, starting playback');
+            await play();
+          } else {
+            console.error('Failed to add track to end');
+          }
         }
       }
     } catch (error) {
+      console.error('Error in handleAudioPress:', error);
       setError(`Error handling audio press: ${(error as Error).message}`);
     } finally {
       setIsLoading(false);

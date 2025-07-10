@@ -30,7 +30,7 @@ export default function Home({ navigation }) {
     getAllBooks();
   }, []);
   const dispatch = useDispatch();
-
+  console.log('allBooks', allBooks);
   return (
     <SafeAreaView className="flex-1 bg-[#f9f9f9]">
       <StatusBar backgroundColor="#0361F0" />

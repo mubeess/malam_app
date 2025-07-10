@@ -1,9 +1,19 @@
 import { MalamImage, TawheedImage } from '@assets/Images';
 import { AudioIcon, ChevronRight, ClockIcon, DownloadIcon, PauseIcon, PlayIcon } from '@assets/svg';
 
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Platform, Share } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Platform,
+  Share,
+  Animated,
+} from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
+
 const AudioListItem = ({
   title = 'Daurar Ilimin Hadisi - 2022',
   totalTracks = 7,
@@ -16,100 +26,120 @@ const AudioListItem = ({
   url,
   isPlaying,
 }) => {
-  const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  // Pulsing animation effect
+  useEffect(() => {
+    if (isDownloading) {
+      const pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 0.3,
+            duration: 800,
+            useNativeDriver: false,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: false,
+          }),
+        ])
+      );
+
+      pulseAnimation.start();
+
+      return () => {
+        pulseAnimation.stop();
+        pulseAnim.setValue(1);
+      };
+    } else {
+      pulseAnim.setValue(1);
+    }
+  }, [isDownloading, pulseAnim]);
+
   const downloadAudio = async () => {
+    if (isDownloading) return; // Prevent multiple downloads
+
     setIsDownloading(true);
-    setDownloadProgress(0);
+    setError(null);
 
     // Generate filename from URL or use title
     const timestamp = new Date().getTime();
     const filename = `${title?.replace(/\s+/g, '_')}_${timestamp}.mp3`;
 
     try {
-      // Set download directory based on platform
       const { dirs } = RNFetchBlob.fs;
 
-      // For iOS, use DocumentDir
       if (Platform.OS === 'ios') {
         const filePath = `${dirs.DocumentDir}/${filename}`;
 
-        RNFetchBlob.config({
+        const task = RNFetchBlob.config({
           fileCache: true,
           path: filePath,
-        })
-          .fetch('GET', url)
-          .progress((received, total) => {
-            const progress = received / total;
-            setDownloadProgress(progress);
-          })
-          .then((res) => {
-            setIsDownloading(false);
-            setDownloadProgress(0);
-            console.log('Download complete:', res.path());
+        }).fetch('GET', url);
 
-            // Share the file
-            Share.share({ url: `file://${res.path()}` });
-          })
-          .catch((err) => {
-            setIsDownloading(false);
-            console.error('Download error:', err);
-            setError('Download failed');
-          });
-      }
-      // For Android
-      else {
-        // For Android, use the Download Manager to handle downloads
-        RNFetchBlob.config({
+        const res = await task;
+
+        setIsDownloading(false);
+        console.log('Download complete:', res.path());
+
+        // Share the file
+        await Share.share({ url: `file://${res.path()}` });
+      } else {
+        // Android implementation
+        const task = RNFetchBlob.config({
           addAndroidDownloads: {
             useDownloadManager: true,
             notification: true,
             title: `${title || 'Audio'}`,
             description: 'Audio download in progress',
-            mime: 'audio/mpeg', // Change to correct MIME type for mp3
+            mime: 'audio/mpeg',
             mediaScannable: true,
-            path: `${RNFetchBlob.fs.dirs.DownloadDir}/${filename}`,
+            path: `${dirs.DownloadDir}/${filename}`,
           },
-        })
-          .fetch('GET', url)
-          .progress((received, total) => {
-            const progress = received / total;
-            setDownloadProgress(progress);
-          })
-          .then((res) => {
-            setIsDownloading(false);
-            setDownloadProgress(0);
-            console.log('Download complete:', res.path());
-          })
-          .catch((err) => {
-            setIsDownloading(false);
-            console.error('Download error:', err);
-            setError('Download failed');
-          });
+        }).fetch('GET', url);
+
+        const res = await task;
+
+        setIsDownloading(false);
+        console.log('Android Download complete:', res.path());
       }
     } catch (error) {
       setIsDownloading(false);
-      console.log('General error:', error);
-      setError('Download process failed');
+      console.error('Download error:', error);
+      setError('Download failed');
     }
   };
+
   return (
     <View className="flex-row w-full bg-white rounded-xl shadow mb-3 overflow-hidden">
       <View className="flex-row items-center w-full p-3">
-        {/* Left section - Thumbnail with music icon overlay */}
-        <TouchableOpacity
-          onPress={downloadAudio}
-          className="w-[50px] h-[50px] bg-green-800 rounded-full mr-3 justify-center items-center relative"
+        {/* Left section - Download button */}
+        <Animated.View
+          style={[
+            {
+              opacity: pulseAnim,
+            },
+          ]}
         >
-          {isDownloading ? (
-            <View style={styles.downloadProgress}>
-              <Text style={styles.downloadProgressText}>{Math.round(downloadProgress * 100)}%</Text>
-            </View>
-          ) : (
-            <DownloadIcon color="#FFFFFF" />
-          )}
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={downloadAudio}
+            disabled={isDownloading}
+            className={`w-[50px] h-[50px] ${
+              isDownloading ? 'bg-blue-500' : 'bg-green-800'
+            } rounded-full mr-3 justify-center items-center relative`}
+          >
+            {isDownloading ? (
+              <View style={styles.downloadProgress}>
+                <Text style={styles.downloadProgressText}>...</Text>
+              </View>
+            ) : (
+              <DownloadIcon color="#FFFFFF" />
+            )}
+          </TouchableOpacity>
+        </Animated.View>
 
         {/* Content section */}
         <View className="flex-1 justify-between py-1">
@@ -117,15 +147,14 @@ const AudioListItem = ({
           <View className="flex-row justify-between items-start">
             <View className="flex-1 pr-4">
               <Text className="text-lg font-semibold text-black">{title}</Text>
+              {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
             </View>
           </View>
-
-          {/* Mosque name with icon */}
         </View>
 
-        {/* Right chevron */}
+        {/* Right play/pause button */}
         <TouchableOpacity
-          onPress={onPress}
+          onPress={() => onPress()}
           className="w-[50px] h-[50px] justify-center items-center"
         >
           {isPlaying ? <PauseIcon /> : <PlayIcon />}
@@ -150,4 +179,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
 export default AudioListItem;

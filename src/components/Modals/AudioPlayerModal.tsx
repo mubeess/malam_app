@@ -256,7 +256,7 @@ const AudioPlayerModal = ({
             {/* Skip previous */}
             <TouchableOpacity onPress={onSkipToPrevious} className="mx-2">
               <View className="p-2">
-                <Text className="text-4xl">⏮</Text>
+                <Text className="text-4xl text-black">⏮</Text>
               </View>
             </TouchableOpacity>
 
@@ -273,7 +273,7 @@ const AudioPlayerModal = ({
             {/* Skip next */}
             <TouchableOpacity onPress={onSkipToNext} className="mx-2">
               <View className="p-2">
-                <Text className="text-4xl">⏭</Text>
+                <Text className="text-4xl text-black">⏭</Text>
               </View>
             </TouchableOpacity>
           </View>

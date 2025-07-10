@@ -39,10 +39,11 @@ export default function BookDetails() {
     addTracks,
     setCurrentAudioIndex,
     skipToTrack,
+    handleAudioPress: contextHandleAudioPress,
+    currentAudioIndex,
   } = useAudioPlayer();
 
   const id = useSelector((data: RootState) => data.book.id);
-  const [activeAudioIndex, setActiveAudioIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const { getAudioReferencesByBookId, loading, allAudioReferences } = useAudio();
   const [error, setError] = useState<string | null>(null);
@@ -58,50 +59,26 @@ export default function BookDetails() {
 
   useEffect(() => {
     if (allAudioReferences && allAudioReferences.length > 0) {
+      // Filter out items without required fields first
+      const validAudioReferences = allAudioReferences.filter((audio) => audio.url && audio.title);
+
       // Convert API audio references to track format for audio player
-      const tracks = allAudioReferences.map((audio, index) => ({
+      const tracks = validAudioReferences.map((audio, index) => ({
         id: `track-${index}`,
-        url: audio.url,
-        title: audio.title,
+        url: audio.url!,
+        title: audio.title!,
         artist: 'Sheikh Abubakar Mukhtar',
         artwork: MalamImage,
       }));
-      console.log(tracks);
+      console.log('Tracks to add:', tracks);
       // Add all tracks to the player queue
       addTracks(tracks);
     }
   }, [allAudioReferences]);
 
-  useEffect(() => {
-    if (isPlaying) {
-      play();
-    }
-  }, [activeAudioIndex]);
-
-  const handleAudioPress = async (item, index) => {
-    setIsLoading(true);
-
-    try {
-      // If the same audio is clicked and it's playing, pause it
-      if (activeAudioIndex === index && isPlaying) {
-        await pause();
-      }
-      // If the same audio is clicked but paused, resume playback
-      else if (activeAudioIndex === index && !isPlaying) {
-        await play();
-      }
-      // If a different audio is clicked, set to play that index
-      else {
-        setActiveAudioIndex(index);
-        skipToTrack(index);
-        // This will automatically play the track at this index
-        // await skipToNext(index);
-      }
-    } catch (error) {
-      console.error('Error handling audio press:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleAudioPress = async (item: any, index: number) => {
+    // Use the context's handleAudioPress method for consistent behavior
+    await contextHandleAudioPress(item, index);
   };
 
   const handleSkipForward10 = () => {
@@ -191,8 +168,8 @@ export default function BookDetails() {
     }
   };
   // Enhanced AudioListItem with play state
-  const renderAudioItem = (item, index) => {
-    const isActive = activeAudioIndex === index;
+  const renderAudioItem = (item: any, index: number) => {
+    const isActive = currentAudioIndex === index;
 
     return (
       <AudioListItem
@@ -201,10 +178,9 @@ export default function BookDetails() {
         key={index}
         onPress={() => handleAudioPress(item, index)}
         onDownload={() => downloadAudio(item.url)}
-        
         {...item}
         isPlaying={isActive && isPlaying}
-        isLoading={isLoading && activeAudioIndex === index}
+        isLoading={isLoading && currentAudioIndex === index}
       />
     );
   };
@@ -226,10 +202,13 @@ export default function BookDetails() {
     );
   }
 
+  // Filter valid audio references for rendering
+  const validAudioReferences = allAudioReferences.filter((audio) => audio.url && audio.title);
+
   return (
-    <View className="flex-1 bg-gray-50 p-4">
+    <View className="flex-1 bg-gray-50 p-4 pb-[40px]">
       <ScrollView showsVerticalScrollIndicator={false}>
-        {allAudioReferences.map((item, index) => renderAudioItem(item, index))}
+        {validAudioReferences.map((item, index) => renderAudioItem(item, index))}
       </ScrollView>
     </View>
   );

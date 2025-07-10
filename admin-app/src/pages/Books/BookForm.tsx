@@ -113,7 +113,7 @@ const BookForm: React.FC<BookFormProps> = ({
 
         <FileUpload
           onUploadComplete={(url) => {
-            setFormData({ ...formData, coverImage: url });
+            setFormData({ ...formData, coverImage: url[0].url });
             setUploadStatus('Upload successful!');
           }}
           onUploadStart={() => {

@@ -4,6 +4,7 @@ import MainAppStack from './stack/MainAppStack';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useAudioPlayer } from '@amukhtar/context/audio/AudioPlayerContext';
 import AudioPlayerModal from '@amukhtar/components/Modals/AudioPlayerModal';
+import NewAppUpdateModal from '@amukhtar/components/updates/NewAppUpdateModal';
 
 export default function AppNavigation() {
   const {
@@ -25,6 +26,7 @@ export default function AppNavigation() {
   } = useAudioPlayer();
   return (
     <>
+      <NewAppUpdateModal />
       <NavigationContainer>
         <MainAppStack />
       </NavigationContainer>
