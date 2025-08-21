@@ -125,4 +125,13 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // Force exclude Coil 3 to avoid Kotlin 2.2 requirement
+    configurations.all {
+        exclude group: 'io.coil-kt.coil3'
+        exclude group: 'io.coil-kt', module: 'coil-core'
+        exclude group: 'io.coil-kt', module: 'coil-svg'
+        exclude group: 'io.coil-kt', module: 'coil-network-core'
+        exclude group: 'io.coil-kt', module: 'coil-network-okhttp'
+    }
 }

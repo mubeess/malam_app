@@ -10,7 +10,7 @@ import TrackPlayer, {
   AddTrack,
   Capability,
 } from 'react-native-track-player';
-import { AppState, Platform } from 'react-native';
+import { AppState, Platform, PermissionsAndroid } from 'react-native';
 
 // Setup function that should be called once in your app
 export const setupPlayer = async (): Promise<boolean> => {
@@ -53,7 +53,7 @@ export const setupPlayer = async (): Promise<boolean> => {
             Capability.SkipToPrevious,
           ],
           notificationColor: '#CCCCCC',
-          notificationIcon: 'notification_icon',
+          notificationIcon: 'ic_launcher',
         },
       },
       // iOS background capabilities
@@ -156,6 +156,25 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
       // Reset player when component unmounts
       TrackPlayer.reset();
     };
+  }, []);
+
+  // Request Android 13+ notification permission for media controls
+  useEffect(() => {
+    const requestNotificationPermission = async (): Promise<void> => {
+      if (Platform.OS !== 'android') return;
+      try {
+        const sdkInt = Number.parseInt(String((global as any).HermesInternal ? 999 : 0)) || 0; // fallback, not reliable
+        // Use PermissionsAndroid to request POST_NOTIFICATIONS on SDK 33+
+        // Even if sdkInt detection fails, requesting is safe on lower SDKs (will be ignored)
+        // @ts-expect-error constant may not exist on older RN types
+        const result = await PermissionsAndroid.request('android.permission.POST_NOTIFICATIONS');
+        // result can be 'granted' | 'denied' | 'never_ask_again'
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    requestNotificationPermission();
   }, []);
 
   // Handle app state changes for background playback

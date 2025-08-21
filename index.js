@@ -3,6 +3,7 @@
  */
 import './gesture-handler';
 import { AppRegistry } from 'react-native';
+import TrackPlayer from 'react-native-track-player';
 
 import NewRelic from 'newrelic-react-native-agent';
 import * as appVersion from './package.json';
@@ -57,4 +58,6 @@ const agentConfiguration = {
 
 NewRelic.startAgent(appToken, agentConfiguration);
 NewRelic.setJSAppVersion(appVersion.version);
+// Register background playback service for remote controls
+TrackPlayer.registerPlaybackService(() => require('./service'));
 AppRegistry.registerComponent(appName, () => App);
