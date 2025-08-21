@@ -59,13 +59,70 @@ const AudioListItem = ({
     }
   }, [isDownloading, pulseAnim]);
 
+  // const downloadAudio = async () => {
+  //   if (isDownloading) return; // Prevent multiple downloads
+
+  //   setIsDownloading(true);
+  //   setError(null);
+
+  //   // Generate filename from URL or use title
+  //   const timestamp = new Date().getTime();
+  //   const filename = `${title?.replace(/\s+/g, '_')}_${timestamp}.mp3`;
+
+  //   try {
+  //     const { dirs } = RNFetchBlob.fs;
+
+  //     if (Platform.OS === 'ios') {
+  //       const filePath = `${dirs.DocumentDir}/${filename}`;
+
+  //       const task = RNFetchBlob.config({
+  //         fileCache: true,
+  //         path: filePath,
+  //       }).fetch('GET', url);
+
+  //       const res = await task;
+
+  //       setIsDownloading(false);
+  //       console.log('Download complete:', res.path());
+
+  //       // Share the file
+  //       await Share.share({ url: `file://${res.path()}` });
+  //     } else {
+  //       // Android implementation
+  //       const task = RNFetchBlob.config({
+  //         addAndroidDownloads: {
+  //           useDownloadManager: true,
+  //           notification: true,
+  //           title: `${title || 'Audio'}`,
+  //           description: 'Audio download in progress',
+  //           mime: 'audio/mpeg',
+  //           mediaScannable: true,
+  //           path: `${dirs.DownloadDir}/${filename}`,
+  //         },
+  //       }).fetch('GET', url);
+
+  //       const res = await task;
+
+  //       setIsDownloading(false);
+  //       console.log('Android Download complete:', res.path());
+  //     }
+  //   } catch (error) {
+  //     setIsDownloading(false);
+  //     console.error('Download error:', error);
+  //     setError('Download failed');
+  //   }
+  // };
   const downloadAudio = async () => {
-    if (isDownloading) return; // Prevent multiple downloads
+    if (isDownloading) return;
+
+    if (!url) {
+      setError('No download URL provided');
+      return;
+    }
 
     setIsDownloading(true);
     setError(null);
 
-    // Generate filename from URL or use title
     const timestamp = new Date().getTime();
     const filename = `${title?.replace(/\s+/g, '_')}_${timestamp}.mp3`;
 
@@ -78,17 +135,30 @@ const AudioListItem = ({
         const task = RNFetchBlob.config({
           fileCache: true,
           path: filePath,
+          timeout: 30000, // 30 second timeout
         }).fetch('GET', url);
 
         const res = await task;
 
-        setIsDownloading(false);
+        const fileExists = await RNFetchBlob.fs.exists(res.path());
+        if (!fileExists) {
+          throw new Error('Downloaded file not found');
+        }
+
         console.log('Download complete:', res.path());
 
-        // Share the file
-        await Share.share({ url: `file://${res.path()}` });
+        // Try to share the file
+        try {
+          await Share.share({
+            url: `file://${res.path()}`,
+            title: title || 'Audio File',
+          });
+        } catch (shareError) {
+          console.log('Share failed, but file downloaded successfully');
+          setError('File downloaded but sharing failed');
+        }
       } else {
-        // Android implementation
+        // Android implementation with better error handling
         const task = RNFetchBlob.config({
           addAndroidDownloads: {
             useDownloadManager: true,
@@ -99,20 +169,29 @@ const AudioListItem = ({
             mediaScannable: true,
             path: `${dirs.DownloadDir}/${filename}`,
           },
+          timeout: 30000,
         }).fetch('GET', url);
 
         const res = await task;
-
-        setIsDownloading(false);
         console.log('Android Download complete:', res.path());
       }
     } catch (error) {
-      setIsDownloading(false);
       console.error('Download error:', error);
-      setError('Download failed');
+
+      // More specific error messages
+      if (error.message.includes('Network')) {
+        setError('Network error - check connection');
+      } else if (error.message.includes('timeout')) {
+        setError('Download timeout - try again');
+      } else if (error.message.includes('permission')) {
+        setError('Permission denied - check app permissions');
+      } else {
+        setError('Download failed - try again');
+      }
+    } finally {
+      setIsDownloading(false);
     }
   };
-
   return (
     <View className="flex-row w-full bg-white rounded-xl shadow mb-3 overflow-hidden">
       <View className="flex-row items-center w-full p-3">

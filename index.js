@@ -12,9 +12,9 @@ import App from './App';
 let appToken;
 
 if (Platform.OS === 'ios') {
-  appToken = 'AA8d7b7c4c204f64f2d013c8d2a7e613aeed6a41ea-NRMA';
+  appToken = 'AAad2259f4b602839692463c770025ca0292b1e20b-NRMA';
 } else {
-  appToken = 'AA0ed1b8018c219508f2128b2e77c228f01e7f2ac8-NRMA';
+  appToken = 'AA84f3a4c9d6438fd786806c63bb49a34bd6faf974-NRMA';
 }
 
 const agentConfiguration = {

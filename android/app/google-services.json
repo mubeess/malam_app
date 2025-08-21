@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "794837180218",
+    "project_id": "sheikh-abubakar-mukhtar",
+    "storage_bucket": "sheikh-abubakar-mukhtar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:794837180218:android:2715e979dea714ff45ba03",
+        "android_client_info": {
+          "package_name": "com.abubakar.mukhtar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6x-edZcXJ0CuDkC1abKZoeQOgyYZpi9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
